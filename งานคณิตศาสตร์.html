@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ห้องทดลองเซต</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@600;700&family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#1E2B24;
+    --panel:#25362D;
+    --panel-2:#2C4034;
+    --grid-line: rgba(242,239,227,0.06);
+    --ink:#F2EFE3;
+    --ink-dim:#C7CCC0;
+    --setA:#E7B23B;
+    --setB:#5FA8D3;
+    --accent:#C97BC4;
+    --accent-2:#8FA98A;
+    --good:#7FBF8F;
+    --bad:#D97A7A;
+    --border: rgba(242,239,227,0.16);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:
+      linear-gradient(var(--grid-line) 1px, transparent 1px) 0 0/28px 28px,
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px) 0 0/28px 28px,
+      var(--bg);
+    color:var(--ink);
+    font-family:'Sarabun', sans-serif;
+    min-height:100vh;
+  }
+  .wrap{max-width:1100px; margin:0 auto; padding:28px 20px 60px;}
+  h1{font-family:'Kanit',sans-serif; font-size:clamp(24px,4vw,34px); margin:0 0 6px;}
+  h2{font-family:'Kanit',sans-serif; font-size:18px; margin:0 0 12px;}
+  h3{font-family:'Kanit',sans-serif; font-size:15px; margin:0 0 6px; color:var(--ink);}
+  .sub{color:var(--ink-dim); margin:0 0 22px; font-size:15px; line-height:1.6; max-width:66ch;}
+  p{line-height:1.7; font-size:15px;}
+  .tabs{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:22px; border-bottom:1px solid var(--border); padding-bottom:14px;}
+  .tabs button{
+    background:transparent; color:var(--ink-dim); border:1px solid var(--border);
+    border-radius:20px; padding:8px 16px; font-family:'Sarabun'; font-weight:600; font-size:14px;
+    cursor:pointer; transition:all .2s;
+  }
+  .tabs button:hover{color:var(--ink); border-color:var(--ink-dim);}
+  .tabs button.active{background:var(--accent); color:#241729; border-color:var(--accent);}
+  .tabpanel{display:none; animation:fadein .35s ease;}
+  .tabpanel.active{display:block;}
+  @keyframes fadein{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);}}
+
+  .panel{background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:20px; margin-bottom:18px;}
+  .cards{display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px; margin-top:14px;}
+  .card{background:var(--panel-2); border:1px solid var(--border); border-radius:8px; padding:14px;}
+  .card .ex{margin-top:8px; font-family:'Kanit'; color:var(--setA); font-size:15px;}
+
+  label{display:block; font-size:13px; color:var(--ink-dim); margin:12px 0 5px;}
+  label b{color:var(--ink);}
+  input[type=text], textarea{
+    width:100%; background:var(--panel-2); color:var(--ink); border:1px solid var(--border);
+    border-radius:6px; padding:8px 10px; font-family:'Sarabun'; font-size:14px;
+  }
+  textarea{resize:none; min-height:44px; line-height:1.4;}
+  input:focus, textarea:focus{outline:2px solid var(--accent-2); border-color:transparent;}
+  .row{display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end;}
+  .row > div{flex:1; min-width:160px;}
+  button.action{
+    background:var(--accent); color:#241729; border:none; border-radius:6px;
+    padding:10px 18px; font-family:'Sarabun'; font-weight:700; font-size:14px; cursor:pointer;
+  }
+  button.action:hover{filter:brightness(1.08);}
+  .checkResult{margin-top:12px; font-size:16px; font-family:'Kanit';}
+  .checkResult.yes{color:var(--good);}
+  .checkResult.no{color:var(--bad);}
+
+  .chipbox{margin-top:14px;}
+  .chipgroup{margin-bottom:10px;}
+  .chipgroup h4{font-size:12px; color:var(--ink-dim); margin:0 0 6px; font-weight:600;}
+  .chip{
+    display:inline-block; background:var(--panel-2); border:1px solid var(--border);
+    border-radius:16px; padding:4px 10px; margin:3px; font-size:13px;
+  }
+  .chip.special{border-color:var(--accent); color:var(--accent);}
+  .note{color:var(--ink-dim); font-size:13px;}
+  .warn{color:var(--bad); font-size:13px; margin-top:8px;}
+
+  .grid{display:grid; grid-template-columns: 340px 1fr; gap:20px;}
+  @media (max-width:760px){ .grid{grid-template-columns:1fr;} }
+  .ops{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:18px;}
+  .ops button{
+    background:var(--panel-2); color:var(--ink); border:1px solid var(--border);
+    border-radius:6px; padding:10px 6px; font-family:'Sarabun'; font-weight:600;
+    font-size:15px; cursor:pointer; transition:background .2s, border-color .2s;
+  }
+  .ops button:hover{border-color:var(--ink-dim);}
+  .ops button.active{background:var(--accent); border-color:var(--accent); color:#241729;}
+  .result{margin-top:18px; padding:14px; background:var(--panel-2); border-radius:8px; border:1px solid var(--border); min-height:56px; font-size:15px; line-height:1.6;}
+  .def{margin-top:8px; color:var(--ink-dim); font-size:13px; line-height:1.6; border-top:1px solid var(--border); padding-top:8px;}
+  .diagram{display:flex; align-items:center; justify-content:center;}
+  svg{width:100%; height:auto; max-width:640px;}
+  .token{fill:var(--ink); font-family:'Sarabun'; font-weight:600;}
+  .hl{opacity:0; transition:opacity .35s ease;}
+  .hl.active{opacity:.55;}
+  .stats{display:flex; gap:18px; margin:0 0 16px; flex-wrap:wrap;}
+  .stats span{font-size:13px; color:var(--ink-dim); background:var(--panel-2); border:1px solid var(--border); padding:5px 12px; border-radius:20px;}
+  .stats b{color:var(--ink); font-family:'Kanit';}
+  @keyframes draw{to{stroke-dashoffset:0;}}
+  .circleA, .circleB{stroke-dasharray:817; stroke-dashoffset:817; animation:draw 1.15s ease forwards;}
+  .circleB{animation-delay:.18s;}
+
+  .gameTop{display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:8px;}
+  .gameTop .prog{font-size:13px; color:var(--ink-dim);}
+  .gameTop .score{font-family:'Kanit'; font-size:15px; color:var(--accent);}
+  .qtext{font-family:'Kanit'; font-size:19px; margin-bottom:16px; line-height:1.5;}
+  .choices{display:grid; gap:10px;}
+  .choice{
+    background:var(--panel-2); border:1px solid var(--border); border-radius:8px;
+    padding:12px 14px; text-align:right; font-family:'Sarabun'; font-size:15px; cursor:pointer;
+    direction:rtl; unicode-bidi:plaintext;
+  }
+  .choice:hover:not(.locked){border-color:var(--accent-2);}
+  .choice.correct{background:rgba(127,191,143,0.25); border-color:var(--good); color:var(--good);}
+  .choice.wrong{background:rgba(217,122,122,0.2); border-color:var(--bad); color:var(--bad);}
+  .explainBox{margin-top:14px; padding:12px; background:var(--panel-2); border-radius:8px; border:1px solid var(--border); font-size:14px; line-height:1.6; display:none;}
+  .nextBtn{margin-top:14px;}
+  .finalScore{text-align:center; padding:20px 0;}
+  .finalScore .big{font-family:'Kanit'; font-size:44px; color:var(--accent);}
+  .finalScore .tier{font-family:'Kanit'; font-size:20px; margin-top:6px;}
+  .matchGrid{display:grid; grid-template-columns:repeat(4,1fr); gap:10px;}
+  @media (max-width:560px){ .matchGrid{grid-template-columns:repeat(2,1fr);} }
+  .matchCard{
+    aspect-ratio:1; background:var(--panel-2); border:1px solid var(--border); border-radius:8px;
+    display:flex; align-items:center; justify-content:center; text-align:center; cursor:pointer;
+    font-family:'Kanit'; font-size:14px; padding:6px; user-select:none; transition:background .2s, border-color .2s;
+  }
+  .matchCard .back{font-size:22px; color:var(--ink-dim);}
+  .matchCard.flipped{background:var(--panel); border-color:var(--accent-2); color:var(--ink);}
+  .matchCard.matched{background:rgba(127,191,143,0.2); border-color:var(--good); color:var(--good); cursor:default;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>ห้องทดลองเซต</h1>
+  <p class="sub">เรียนรู้เรื่องเซตตั้งแต่นิยาม สับเซต เพาเวอร์เซต แผนภาพเวนน์ ไปจนถึงการดำเนินการระหว่างเซต แล้วทดสอบความเข้าใจด้วยเกมท้ายบท</p>
+
+  <div class="tabs" id="tabs">
+    <button data-tab="intro" class="active">1. เซตคืออะไร</button>
+    <button data-tab="types">2. ประเภทของเซต</button>
+    <button data-tab="subset">3. สับเซต &amp; เพาเวอร์เซต</button>
+    <button data-tab="venn">4. แผนภาพเวนน์</button>
+    <button data-tab="solve">5. แก้โจทย์ปัญหา</button>
+    <button data-tab="game">6. เกม</button>
+  </div>
+
+  <!-- TAB 1: INTRO -->
+  <div class="tabpanel active" id="tab-intro">
+    <div class="panel">
+      <h2>นิยามและสัญลักษณ์</h2>
+      <p><b>เซต (Set)</b> คือการรวมกลุ่มของสิ่งต่าง ๆ ที่มีขอบเขตแน่นอน ชัดเจนว่าสิ่งใดเป็นสมาชิกและสิ่งใดไม่เป็น สิ่งที่อยู่ในเซตเรียกว่า <b>สมาชิก (element)</b></p>
+      <p>เขียนแสดงเซตได้ 2 แบบ: <br>
+      • แบบแจกแจงสมาชิก เช่น A = {1, 2, 3, 4} <br>
+      • แบบบอกเงื่อนไข เช่น A = {x | x เป็นจำนวนนับที่น้อยกว่า 5}</p>
+      <p>สัญลักษณ์ที่ใช้บ่อย: <b>∈</b> แปลว่า "เป็นสมาชิกของ", <b>∉</b> แปลว่า "ไม่เป็นสมาชิกของ", <b>∅</b> แทนเซตว่าง, <b>U</b> แทนเอกภพสัมพัทธ์ (ขอบเขตของสิ่งที่กำลังพูดถึง)</p>
+    </div>
+    <div class="panel">
+      <h2>ลองตรวจสอบสมาชิกเอง</h2>
+      <div class="row">
+        <div><label>เซต (คั่นด้วยจุลภาค)</label><input type="text" id="memberSet" value="1,2,3,4,5"></div>
+        <div><label>สิ่งที่ต้องการตรวจสอบ</label><input type="text" id="memberItem" value="3"></div>
+        <div><button class="action" onclick="checkMember()">ตรวจสอบ</button></div>
+      </div>
+      <div class="checkResult" id="memberResult"></div>
+    </div>
+    <div class="panel">
+      <h2>การเขียนแสดงเซต: สองแบบที่ต้องแปลงกันได้</h2>
+      <div class="cards">
+        <div class="card"><h3>แบบแจกแจงสมาชิก (Roster)</h3><div class="ex">A = {2, 4, 6, 8}</div><p>เขียนสมาชิกทีละตัวในวงเล็บปีกกา คั่นด้วยจุลภาค</p></div>
+        <div class="card"><h3>แบบบอกเงื่อนไข (Set-builder)</h3><div class="ex">A = {x | x เป็นจำนวนคู่บวกที่น้อยกว่า 10}</div><p>บอกกฎที่สมาชิกทุกตัวต้องเป็นจริง แทนที่จะไล่เขียนทีละตัว</p></div>
+        <div class="card"><h3>ตัวอย่างเซตอนันต์แบบ Roster</h3><div class="ex">B = {5, 10, 15, 20, ...}</div><p>ใช้จุดไข่ปลาแทนรูปแบบที่ดำเนินต่อไปเรื่อย ๆ</p></div>
+        <div class="card"><h3>แปลงกลับกัน</h3><div class="ex">{1,3,5,7,9} ↔ {x | x คือเลขคี่ 1–9}</div><p>สองแบบนี้แทนเซตเดียวกัน เลือกใช้แบบไหนก็ได้ตามความสะดวก</p></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tabpanel" id="tab-types">
+    <div class="panel">
+      <h2>ประเภทของเซต</h2>
+      <div class="cards">
+        <div class="card"><h3>เซตจำกัด (Finite Set)</h3><p>เซตที่นับจำนวนสมาชิกได้ครบถ้วน</p><div class="ex">A = {1, 2, 3, 4}</div></div>
+        <div class="card"><h3>เซตอนันต์ (Infinite Set)</h3><p>เซตที่มีสมาชิกไม่สิ้นสุด นับไม่ครบ</p><div class="ex">B = {1, 2, 3, 4, ...}</div></div>
+        <div class="card"><h3>เซตว่าง (Empty Set)</h3><p>เซตที่ไม่มีสมาชิกเลย เขียนแทนด้วย ∅ หรือ { }</p><div class="ex">C = {x | x เป็นคนที่สูงเกิน 5 เมตร} = ∅</div></div>
+        <div class="card"><h3>เอกภพสัมพัทธ์ (Universal Set)</h3><p>เซตที่กำหนดขอบเขตของสิ่งที่กำลังพิจารณาทั้งหมด</p><div class="ex">U = {1, 2, 3, ..., 10}</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 3: SUBSET / POWER SET -->
+  <div class="tabpanel" id="tab-subset">
+    <div class="panel">
+      <h2>สับเซต (Subset)</h2>
+      <p><b>A เป็นสับเซตของ B</b> เขียนแทนด้วย A ⊆ B หมายความว่า สมาชิกทุกตัวของ A ต้องเป็นสมาชิกของ B ด้วย เซตว่าง (∅) และตัวเซตเอง เป็นสับเซตของทุกเซตเสมอ</p>
+      <h2 style="margin-top:18px;">เพาเวอร์เซต (Power Set)</h2>
+      <p><b>เพาเวอร์เซตของ A</b> คือเซตที่มีสมาชิกเป็นสับเซตทั้งหมดของ A ถ้า A มีสมาชิก n ตัว จำนวนสับเซตทั้งหมดจะเท่ากับ <b>2ⁿ</b> ตัว</p>
+    </div>
+    <div class="panel">
+      <h2>ลองสร้างสับเซตและเพาเวอร์เซตเอง</h2>
+      <div class="row">
+        <div><label>ใส่สมาชิกเซต (ไม่เกิน 8 ตัว)</label><input type="text" id="subsetInput" value="1,2,3"></div>
+        <div><button class="action" onclick="genSubsets()">สร้างสับเซตทั้งหมด</button></div>
+      </div>
+      <div class="warn" id="subsetWarn"></div>
+      <div class="note" id="subsetFormula"></div>
+      <div class="chipbox" id="subsetOutput"></div>
+      <div id="cubeWrap" style="display:none; margin-top:18px; border-top:1px solid var(--border); padding-top:14px;">
+        <h3>มุมมอง 3 มิติ: เพาเวอร์เซตเป็นลูกบาศก์</h3>
+        <p class="note">แต่ละมุมของลูกบาศก์คือหนึ่งสับเซต เส้นเชื่อมแสดงการเพิ่ม/ลดสมาชิกทีละตัว — ลากหมุนดูได้</p>
+        <div id="cube3d" style="width:100%;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 4: VENN -->
+  <div class="tabpanel" id="tab-venn">
+    <div class="stats" id="statsBox"></div>
+    <div class="grid">
+      <div class="panel controls">
+        <h2>กำหนดเซต</h2>
+        <div class="row" style="margin-bottom:6px;">
+          <button class="action" style="background:var(--panel-2); color:var(--ink); border:1px solid var(--border);" onclick="loadPreset('numbers')">ตัวเลข</button>
+          <button class="action" style="background:var(--panel-2); color:var(--ink); border:1px solid var(--border);" onclick="loadPreset('sports')">กีฬาที่ชอบ</button>
+          <button class="action" style="background:var(--panel-2); color:var(--ink); border:1px solid var(--border);" onclick="loadPreset('pets')">สัตว์เลี้ยง</button>
+        </div>
+        <label>เอกภพสัมพัทธ์ <b>U</b></label>
+        <textarea id="uInput" oninput="render()"></textarea>
+        <label>เซต <b>A</b></label>
+        <textarea id="aInput" oninput="render()"></textarea>
+        <label>เซต <b>B</b></label>
+        <textarea id="bInput" oninput="render()"></textarea>
+        <h2 style="margin-top:20px;">การดำเนินการ</h2>
+        <div class="ops" id="opsBox"></div>
+        <div class="result" id="resultBox"></div>
+      </div>
+      <div class="panel diagram" style="flex-direction:column;">
+        <div class="row" style="width:100%; margin-bottom:10px; justify-content:center;">
+          <button class="action" id="btn2d" style="background:var(--accent);" onclick="setVennView('2d')">มุมมอง 2D</button>
+          <button class="action" id="btn3d" style="background:var(--panel-2); color:var(--ink); border:1px solid var(--border);" onclick="setVennView('3d')">มุมมอง 3D (ลากหมุนได้)</button>
+        </div>
+        <div id="venn2dWrap" style="width:100%;">
+        <svg id="venn" viewBox="0 0 520 420" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <filter id="chalk" x="-30%" y="-30%" width="160%" height="160%">
+              <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" result="n"/>
+              <feDisplacementMap in="SourceGraphic" in2="n" scale="2.6"/>
+            </filter>
+            <mask id="mA"><rect x="0" y="0" width="520" height="420" fill="black"/><circle cx="190" cy="210" r="130" fill="white"/></mask>
+            <mask id="mB"><rect x="0" y="0" width="520" height="420" fill="black"/><circle cx="330" cy="210" r="130" fill="white"/></mask>
+            <mask id="mNotA"><rect x="0" y="0" width="520" height="420" fill="white"/><circle cx="190" cy="210" r="130" fill="black"/></mask>
+            <mask id="mNotB"><rect x="0" y="0" width="520" height="420" fill="white"/><circle cx="330" cy="210" r="130" fill="black"/></mask>
+            <mask id="mUnion"><rect x="0" y="0" width="520" height="420" fill="black"/><circle cx="190" cy="210" r="130" fill="white"/><circle cx="330" cy="210" r="130" fill="white"/></mask>
+            <mask id="mNotUnion"><rect x="0" y="0" width="520" height="420" fill="white"/><circle cx="190" cy="210" r="130" fill="black"/><circle cx="330" cy="210" r="130" fill="black"/></mask>
+          </defs>
+          <rect x="20" y="40" width="480" height="340" rx="6" fill="none" stroke="var(--ink-dim)" stroke-width="2" stroke-dasharray="6 5" filter="url(#chalk)"/>
+          <text x="34" y="64" font-family="Kanit" font-size="18" fill="var(--ink-dim)">U</text>
+          <g class="hl hl-union" data-op="union"><rect x="0" y="0" width="520" height="420" fill="var(--accent)" mask="url(#mUnion)"/></g>
+          <g class="hl hl-inter" data-op="inter"><g mask="url(#mA)"><rect x="0" y="0" width="520" height="420" fill="var(--accent)" mask="url(#mB)"/></g></g>
+          <g class="hl hl-onlyA" data-op="aMinusB"><g mask="url(#mA)"><rect x="0" y="0" width="520" height="420" fill="var(--accent)" mask="url(#mNotB)"/></g></g>
+          <g class="hl hl-onlyB" data-op="bMinusA"><g mask="url(#mB)"><rect x="0" y="0" width="520" height="420" fill="var(--accent)" mask="url(#mNotA)"/></g></g>
+          <g class="hl hl-notA" data-op="notA"><rect x="0" y="0" width="520" height="420" fill="var(--accent)" mask="url(#mNotA)"/></g>
+          <g class="hl hl-notB" data-op="notB"><rect x="0" y="0" width="520" height="420" fill="var(--accent)" mask="url(#mNotB)"/></g>
+          <g class="hl hl-notUnion" data-op="notUnion"><rect x="0" y="0" width="520" height="420" fill="var(--accent)" mask="url(#mNotUnion)"/></g>
+          <circle class="circleA" cx="190" cy="210" r="130" fill="none" stroke="var(--setA)" stroke-width="4" filter="url(#chalk)"/>
+          <circle class="circleB" cx="330" cy="210" r="130" fill="none" stroke="var(--setB)" stroke-width="4" filter="url(#chalk)"/>
+          <text x="150" y="105" font-family="Kanit" font-weight="700" font-size="26" fill="var(--setA)">A</text>
+          <text x="370" y="105" font-family="Kanit" font-weight="700" font-size="26" fill="var(--setB)">B</text>
+          <g id="gOnlyA"></g>
+          <g id="gOnlyB"></g>
+          <g id="gBoth"></g>
+          <g id="gNone"></g>
+        </svg>
+        </div>
+        <div id="venn3dWrap" style="width:100%; display:none;">
+          <p class="note" style="text-align:center;">ลากเมาส์ (หรือปัดนิ้วบนมือถือ) เพื่อหมุนดูรอบทิศทาง — ทรงกลมที่จางลงคือส่วนที่ไม่ได้อยู่ในคำตอบ</p>
+          <div id="venn3d" style="width:100%;"></div>
+        </div>
+      </div>
+    </div>
+    <div class="panel">
+      <h2>สมบัติของการดำเนินการเซต</h2>
+      <p>A ∪ B = B ∪ A และ A ∩ B = B ∩ A (สลับที่ได้) &nbsp;•&nbsp; (A ∪ B) ∪ C = A ∪ (B ∪ C) (เปลี่ยนหมู่ได้) &nbsp;•&nbsp; กฎเดอมอร์แกน: (A ∪ B)′ = A′ ∩ B′ และ (A ∩ B)′ = A′ ∪ B′</p>
+    </div>
+  </div>
+
+  <!-- TAB 5: PROBLEM SOLVING -->
+  <div class="tabpanel" id="tab-solve">
+    <div class="panel">
+      <h2>การแก้ปัญหาโดยใช้เซต</h2>
+      <p>โจทย์ปัญหาที่พูดถึงคนหรือสิ่งของสองกลุ่มที่มีส่วนซ้อนกัน มักแก้ได้ง่ายที่สุดด้วยการ "เติมตัวเลขลงในแผนภาพเวนน์" โดยเริ่มเติมจากส่วนที่ซ้อนกัน (ทั้งสองอย่าง) ก่อนเสมอ แล้วค่อยหักลบหาส่วนที่เหลือ ใช้สูตรหลัก:</p>
+      <p style="font-family:'Kanit'; font-size:17px; color:var(--accent);">n(A ∪ B) = n(A) + n(B) − n(A ∩ B)</p>
+    </div>
+    <div class="panel">
+      <h2>ลองแก้โจทย์ด้วยตัวเอง</h2>
+      <p class="note">ตัวอย่าง: ในห้องเรียนมีคนชอบฟุตบอลอย่างเดียว 11 คน ชอบบาสอย่างเดียว 6 คน ชอบทั้งสองอย่าง 4 คน — ปรับตัวเลขเป็นโจทย์ของตัวเองได้เลย</p>
+      <div class="row">
+        <div><label>ชอบเฉพาะ A (only A)</label><input type="text" id="solveOnlyA" value="11"></div>
+        <div><label>ชอบเฉพาะ B (only B)</label><input type="text" id="solveOnlyB" value="6"></div>
+        <div><label>ชอบทั้งสองอย่าง (A ∩ B)</label><input type="text" id="solveBoth" value="4"></div>
+        <div><label>ไม่ชอบทั้งคู่ (ถ้ามี, เว้นว่างได้)</label><input type="text" id="solveNone" value=""></div>
+      </div>
+      <div class="result" id="solveResult" style="margin-top:16px;"></div>
+      <div class="diagram" style="margin-top:10px;">
+        <svg viewBox="0 0 400 260" style="max-width:420px;">
+          <circle cx="150" cy="130" r="90" fill="var(--setA)" opacity="0.18" stroke="var(--setA)" stroke-width="3"/>
+          <circle cx="250" cy="130" r="90" fill="var(--setB)" opacity="0.18" stroke="var(--setB)" stroke-width="3"/>
+          <text x="90" y="60" font-family="Kanit" fill="var(--setA)" font-size="16" font-weight="700">A</text>
+          <text x="310" y="60" font-family="Kanit" fill="var(--setB)" font-size="16" font-weight="700">B</text>
+          <text id="svgOnlyA" x="105" y="135" text-anchor="middle" font-family="Kanit" font-size="20" fill="var(--ink)"></text>
+          <text id="svgBoth" x="200" y="135" text-anchor="middle" font-family="Kanit" font-size="20" fill="var(--ink)"></text>
+          <text id="svgOnlyB" x="295" y="135" text-anchor="middle" font-family="Kanit" font-size="20" fill="var(--ink)"></text>
+          <text id="svgNone" x="200" y="235" text-anchor="middle" font-family="Sarabun" font-size="13" fill="var(--ink-dim)"></text>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 6: GAME -->
+  <div class="tabpanel" id="tab-game">
+    <div class="tabs" id="gameModeTabs" style="margin-bottom:14px;">
+      <button data-mode="quiz" class="active">แบบทดสอบ 10 ข้อ</button>
+      <button data-mode="match">จับคู่สัญลักษณ์</button>
+    </div>
+    <div class="panel" id="quizMode">
+      <div class="gameTop">
+        <div class="prog" id="gameProg">ข้อที่ 1 จาก 10</div>
+        <div class="score" id="gameScore">คะแนน: 0</div>
+      </div>
+      <div id="gameBody"></div>
+    </div>
+    <div class="panel" id="matchMode" style="display:none;">
+      <div class="gameTop">
+        <div class="prog" id="matchProg">คู่ที่จับได้: 0 / 8</div>
+        <div class="score" id="matchTries">จำนวนครั้งที่เปิด: 0</div>
+      </div>
+      <div class="matchGrid" id="matchGrid"></div>
+      <div id="matchFinal"></div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/128/three.min.js"></script>
+<script>
+const svgNS = "http://www.w3.org/2000/svg";
+
+/* ---------- TAB SWITCHING ---------- */
+document.getElementById('tabs').addEventListener('click', e=>{
+  if(e.target.tagName!=='BUTTON') return;
+  document.querySelectorAll('#tabs button').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.tabpanel').forEach(p=>p.classList.remove('active'));
+  e.target.classList.add('active');
+  document.getElementById('tab-'+e.target.dataset.tab).classList.add('active');
+});
+
+/* ---------- HELPERS ---------- */
+function parseList(str){ return str.split(/[,，\n]/).map(s=>s.trim()).filter(Boolean); }
+function uniq(arr){ return arr.filter((v,i)=>arr.indexOf(v)===i); }
+
+/* ---------- TAB 1: MEMBER CHECK ---------- */
+function checkMember(){
+  const set = uniq(parseList(document.getElementById('memberSet').value));
+  const item = document.getElementById('memberItem').value.trim();
+  const box = document.getElementById('memberResult');
+  if(!item){ box.textContent=''; return; }
+  const isIn = set.includes(item);
+  box.textContent = item + (isIn ? ' ∈ ' : ' ∉ ') + '{' + set.join(', ') + '}';
+  box.className = 'checkResult ' + (isIn?'yes':'no');
+}
+
+/* ---------- TAB 3: SUBSETS / POWER SET ---------- */
+function genSubsets(){
+  const set = uniq(parseList(document.getElementById('subsetInput').value));
+  const n = set.length;
+  const warn = document.getElementById('subsetWarn');
+  const out = document.getElementById('subsetOutput');
+  const formula = document.getElementById('subsetFormula');
+  if(n>8){
+    warn.textContent = 'ใส่สมาชิกไม่เกิน 8 ตัว เพื่อให้แสดงผลได้ชัดเจน (2ⁿ จะโตเร็วมาก)';
+    out.innerHTML=''; formula.textContent=''; return;
+  }
+  warn.textContent='';
+  formula.innerHTML = 'จำนวนสมาชิก n = '+n+' &rarr; จำนวนสับเซตทั้งหมด = 2^'+n+' = <b>'+Math.pow(2,n)+'</b> เซต';
+  const groups = {};
+  for(let mask=0; mask<(1<<n); mask++){
+    const subset = [];
+    for(let i=0;i<n;i++){ if(mask & (1<<i)) subset.push(set[i]); }
+    const size = subset.length;
+    if(!groups[size]) groups[size]=[];
+    groups[size].push(subset);
+  }
+  let html='';
+  Object.keys(groups).sort((a,b)=>a-b).forEach(size=>{
+    html += '<div class="chipgroup"><h4>สับเซตที่มี '+size+' สมาชิก ('+groups[size].length+' เซต)</h4>';
+    groups[size].forEach(s=>{
+      const label = s.length? '{'+s.join(', ')+'}' : '∅';
+      const special = (s.length===0 || s.length===n) ? ' special' : '';
+      html += '<span class="chip'+special+'">'+label+'</span>';
+    });
+    html += '</div>';
+  });
+  out.innerHTML = html;
+  const cubeWrap = document.getElementById('cubeWrap');
+  if(n===3){
+    cubeWrap.style.display='block';
+    if(typeof updateCube3D==='function') updateCube3D(set);
+  } else {
+    cubeWrap.style.display='none';
+  }
+}
+
+/* ---------- TAB 4: VENN DIAGRAM ---------- */
+const OPS = [
+  {key:'union', label:'A ∪ B'},
+  {key:'inter', label:'A ∩ B'},
+  {key:'aMinusB', label:'A − B'},
+  {key:'bMinusA', label:'B − A'},
+  {key:'notA', label:"A′"},
+  {key:'notB', label:"B′"},
+  {key:'notUnion', label:"(A ∪ B)′"},
+];
+let activeOp = null;
+const DEFS = {
+  union: 'A ∪ B คือเซตของสมาชิกที่อยู่ใน A หรือ B (หรือทั้งสองเซต)',
+  inter: 'A ∩ B คือเซตของสมาชิกที่อยู่ทั้งใน A และ B พร้อมกัน',
+  aMinusB: 'A − B คือสมาชิกที่อยู่ใน A แต่ไม่อยู่ใน B',
+  bMinusA: 'B − A คือสมาชิกที่อยู่ใน B แต่ไม่อยู่ใน A',
+  notA: 'A′ คือสมาชิกใน U ที่ไม่ได้อยู่ใน A',
+  notB: 'B′ คือสมาชิกใน U ที่ไม่ได้อยู่ใน B',
+  notUnion: '(A ∪ B)′ คือสมาชิกใน U ที่ไม่อยู่ใน A และไม่อยู่ใน B ทั้งคู่',
+};
+const opsBox = document.getElementById('opsBox');
+OPS.forEach(op=>{
+  const btn = document.createElement('button');
+  btn.textContent = op.label;
+  btn.onclick = ()=>{ activeOp = (activeOp===op.key)? null : op.key; render(); };
+  btn.dataset.key = op.key;
+  opsBox.appendChild(btn);
+});
+
+function placeTokens(gId, tokens, cx, cy, boxW, boxH){
+  const g = document.getElementById(gId);
+  g.innerHTML = '';
+  if(!tokens.length) return;
+  const fontSize = tokens.length<=6 ? 15 : tokens.length<=12 ? 12 : 10;
+  const approxCharW = fontSize*0.62;
+  const maxLen = Math.max(...tokens.map(t=>t.length));
+  const colW = Math.max(30, maxLen*approxCharW+10);
+  const cols = Math.max(1, Math.min(tokens.length, Math.floor(boxW/colW)));
+  const rows = Math.ceil(tokens.length/cols);
+  const rowH = Math.min(fontSize+8, boxH/Math.max(rows,1));
+  const startX = cx - ((cols-1)*colW)/2;
+  const startY = cy - ((rows-1)*rowH)/2;
+  tokens.forEach((t,i)=>{
+    const col = i%cols, row = Math.floor(i/cols);
+    const x = startX+col*colW, y = startY+row*rowH;
+    const el = document.createElementNS(svgNS,'text');
+    el.setAttribute('x',x); el.setAttribute('y',y);
+    el.setAttribute('text-anchor','middle');
+    el.setAttribute('font-size',fontSize);
+    el.setAttribute('class','token');
+    el.textContent = t;
+    g.appendChild(el);
+  });
+}
+
+function render(){
+  const U0 = uniq(parseList(document.getElementById('uInput').value));
+  const A = uniq(parseList(document.getElementById('aInput').value));
+  const B = uniq(parseList(document.getElementById('bInput').value));
+  const U = uniq([...U0, ...A, ...B]);
+  const inA = x=>A.includes(x), inB = x=>B.includes(x);
+  const onlyA = U.filter(x=>inA(x)&&!inB(x));
+  const onlyB = U.filter(x=>inB(x)&&!inA(x));
+  const both = U.filter(x=>inA(x)&&inB(x));
+  const none = U.filter(x=>!inA(x)&&!inB(x));
+  const union = U.filter(x=>inA(x)||inB(x));
+  const notA = U.filter(x=>!inA(x));
+  const notB = U.filter(x=>!inB(x));
+  const notUnion = none;
+
+  placeTokens('gOnlyA', onlyA, 130, 210, 140, 210);
+  placeTokens('gOnlyB', onlyB, 390, 210, 140, 210);
+  placeTokens('gBoth', both, 260, 210, 90, 190);
+  placeTokens('gNone', none, 260, 362, 420, 34);
+
+  document.getElementById('statsBox').innerHTML =
+    '<span>n(U) = <b>'+U.length+'</b></span>'+
+    '<span>n(A) = <b>'+A.length+'</b></span>'+
+    '<span>n(B) = <b>'+B.length+'</b></span>';
+
+  document.querySelectorAll('.hl').forEach(g=>g.classList.remove('active'));
+  document.querySelectorAll('#opsBox button').forEach(b=>b.classList.remove('active'));
+
+  const resultBox = document.getElementById('resultBox');
+  const map = {union, inter:both, aMinusB:onlyA, bMinusA:onlyB, notA, notB, notUnion};
+  if(!activeOp){
+    resultBox.innerHTML = '<span class="note">เลือกการดำเนินการด้านบนเพื่อดูผลลัพธ์ และไฮไลต์บนแผนภาพ</span>';
+    if(typeof updateVenn3D==='function') updateVenn3D({onlyA,onlyB,both,none,activeOp:null,resultSet:null});
+    return;
+  }
+  const opDef = OPS.find(o=>o.key===activeOp);
+  const set = map[activeOp];
+  const hlClass = {union:'hl-union', inter:'hl-inter', aMinusB:'hl-onlyA', bMinusA:'hl-onlyB', notA:'hl-notA', notB:'hl-notB', notUnion:'hl-notUnion'}[activeOp];
+  document.querySelector('.'+hlClass).classList.add('active');
+  document.querySelector('#opsBox button[data-key="'+activeOp+'"]').classList.add('active');
+
+  const listText = set.length ? '{ ' + set.join(', ') + ' }' : '∅ (เซตว่าง)';
+  resultBox.innerHTML = '<strong>'+opDef.label+'</strong> = ' + listText +
+    '<br><span class="note">n('+opDef.label+') = '+set.length+'</span>'+
+    '<div class="def">'+DEFS[activeOp]+'</div>';
+  if(typeof updateVenn3D==='function') updateVenn3D({onlyA,onlyB,both,none,activeOp,resultSet:set});
+}
+
+function loadPreset(name){
+  const presets = {
+    numbers:{u:'1,2,3,4,5,6,7,8,9,10', a:'1,2,3,4,5,6', b:'2,4,6,8,10'},
+    sports:{u:'ฟุตบอล,บาสเกตบอล,วอลเลย์บอล,แบดมินตัน,ว่ายน้ำ,วิ่ง,เทนนิส', a:'ฟุตบอล,บาสเกตบอล,แบดมินตัน,วิ่ง', b:'วอลเลย์บอล,แบดมินตัน,ว่ายน้ำ,วิ่ง'},
+    pets:{u:'สุนัข,แมว,นก,ปลา,กระต่าย,หนูแฮมสเตอร์,เต่า', a:'สุนัข,แมว,นก,ปลา', b:'แมว,ปลา,กระต่าย,เต่า'}
+  };
+  const p = presets[name];
+  document.getElementById('uInput').value = p.u;
+  document.getElementById('aInput').value = p.a;
+  document.getElementById('bInput').value = p.b;
+  activeOp = null;
+  render();
+}
+loadPreset('numbers');
+
+/* ---------- TAB 5: PROBLEM SOLVING ---------- */
+function updateSolve(){
+  const num = id => { const v = parseFloat(document.getElementById(id).value); return isNaN(v)?0:v; };
+  const onlyA = num('solveOnlyA'), onlyB = num('solveOnlyB'), both = num('solveBoth');
+  const noneRaw = document.getElementById('solveNone').value.trim();
+  const none = noneRaw==='' ? null : (parseFloat(noneRaw)||0);
+  const nA = onlyA+both, nB = onlyB+both, nUnion = onlyA+onlyB+both;
+  document.getElementById('svgOnlyA').textContent = onlyA;
+  document.getElementById('svgBoth').textContent = both;
+  document.getElementById('svgOnlyB').textContent = onlyB;
+  document.getElementById('svgNone').textContent = none!==null ? 'ไม่ชอบทั้งคู่ = '+none : '';
+  let html = 'n(A) = '+onlyA+' + '+both+' = <b>'+nA+'</b><br>'+
+             'n(B) = '+onlyB+' + '+both+' = <b>'+nB+'</b><br>'+
+             'n(A ∪ B) = '+onlyA+' + '+onlyB+' + '+both+' = <b>'+nUnion+'</b>';
+  if(none!==null){
+    html += '<br>จำนวนทั้งหมด n(U) = n(A ∪ B) + ไม่ชอบทั้งคู่ = '+nUnion+' + '+none+' = <b>'+(nUnion+none)+'</b>';
+  }
+  document.getElementById('solveResult').innerHTML = html;
+}
+['solveOnlyA','solveOnlyB','solveBoth','solveNone'].forEach(id=>{
+  document.getElementById(id).addEventListener('input', updateSolve);
+});
+updateSolve();
+
+/* ---------- TAB 6: QUIZ GAME ---------- */
+const QUESTIONS = [
+  {q:'เซต {2, 4, 6, 8} เป็นเซตชนิดใด?', choices:['เซตจำกัด','เซตอนันต์','เซตว่าง','เอกภพสัมพัทธ์'], correct:0, explain:'เพราะนับจำนวนสมาชิกได้ครบ (มี 4 ตัว) จึงเป็นเซตจำกัด'},
+  {q:'สัญลักษณ์ใดใช้แทนเซตว่าง?', choices:['∈','⊆','∅','∪'], correct:2, explain:'∅ (หรือ { }) ใช้แทนเซตที่ไม่มีสมาชิกเลย'},
+  {q:'กำหนด A={1,2,3}, B={2,3,4} แล้ว A∩B คือข้อใด?', choices:['{1,2,3,4}','{2,3}','{1}','∅'], correct:1, explain:'อินเตอร์เซกชันคือสมาชิกที่อยู่ในทั้ง A และ B พร้อมกัน คือ 2 กับ 3'},
+  {q:'กำหนด A={1,2,3}, B={2,3,4} แล้ว A∪B คือข้อใด?', choices:['{2,3}','{1}','{1,2,3,4}','{4}'], correct:2, explain:'ยูเนียนคือสมาชิกที่อยู่ใน A หรือ B รวมกันทั้งหมด'},
+  {q:'กำหนด A={1,2,3}, B={2,3,4} แล้ว A−B คือข้อใด?', choices:['{1}','{4}','{2,3}','∅'], correct:0, explain:'A−B คือสมาชิกที่อยู่ใน A แต่ไม่อยู่ใน B นั่นคือ 1'},
+  {q:'ถ้าเซต A มีสมาชิก 3 ตัว จำนวนสับเซตทั้งหมดของ A เท่ากับเท่าใด?', choices:['3','6','8','9'], correct:2, explain:'จำนวนสับเซตทั้งหมด = 2ⁿ เมื่อ n=3 จะได้ 2³ = 8'},
+  {q:'ข้อใดอธิบายความหมายของ A ⊆ B ได้ถูกต้อง?', choices:['A กับ B ไม่มีสมาชิกร่วมกัน','ทุกสมาชิกของ A อยู่ใน B ด้วย','A มีสมาชิกมากกว่า B','A กับ B เท่ากันทุกตัว'], correct:1, explain:'A เป็นสับเซตของ B หมายความว่าสมาชิกทุกตัวของ A ต้องอยู่ใน B ด้วย'},
+  {q:'กำหนด U={1,...,10}, A={1,2,3,4,5} แล้ว A′ (คอมพลีเมนต์ของ A) คือข้อใด?', choices:['{1,2,3,4,5}','{6,7,8,9,10}','∅','{1,...,10}'], correct:1, explain:'A′ คือสมาชิกใน U ที่ไม่อยู่ใน A นั่นคือ 6 ถึง 10'},
+  {q:'"5 ∈ {1,3,5,7}" ข้อความนี้ถูกหรือผิด?', choices:['ถูก','ผิด'], correct:0, explain:'5 เป็นสมาชิกของเซต {1,3,5,7} จริง ข้อความนี้จึงถูกต้อง'},
+  {q:'ห้องเรียนหนึ่งมีคนชอบฟุตบอล 15 คน ชอบบาสเกตบอล 10 คน ชอบทั้งสองอย่าง 4 คน มีคนชอบอย่างน้อยหนึ่งอย่างกี่คน?', choices:['25 คน','21 คน','19 คน','29 คน'], correct:1, explain:'ใช้ n(A∪B) = n(A)+n(B)−n(A∩B) = 15+10−4 = 21 คน'},
+];
+let qIndex=0, score=0, answered=false;
+
+function renderQuestion(){
+  const body = document.getElementById('gameBody');
+  document.getElementById('gameProg').textContent = 'ข้อที่ '+(qIndex+1)+' จาก '+QUESTIONS.length;
+  document.getElementById('gameScore').textContent = 'คะแนน: '+score;
+  const item = QUESTIONS[qIndex];
+  answered = false;
+  let html = '<div class="qtext">'+item.q+'</div><div class="choices">';
+  item.choices.forEach((c,i)=>{
+    html += '<div class="choice" data-i="'+i+'" onclick="answerQuestion('+i+')">'+c+'</div>';
+  });
+  html += '</div><div class="explainBox" id="explainBox"></div>';
+  body.innerHTML = html;
+}
+
+function answerQuestion(i){
+  if(answered) return;
+  answered = true;
+  const item = QUESTIONS[qIndex];
+  const choices = document.querySelectorAll('.choice');
+  choices.forEach(c=>c.classList.add('locked'));
+  choices[item.correct].classList.add('correct');
+  if(i!==item.correct) choices[i].classList.add('wrong');
+  else score++;
+  document.getElementById('gameScore').textContent = 'คะแนน: '+score;
+  const explainBox = document.getElementById('explainBox');
+  explainBox.style.display='block';
+  explainBox.innerHTML = (i===item.correct ? '✅ ถูกต้อง! ' : '❌ ยังไม่ถูก ') + item.explain +
+    '<br><button class="action nextBtn" onclick="nextQuestion()">'+(qIndex<QUESTIONS.length-1?'ข้อต่อไป':'ดูผลสรุป')+'</button>';
+}
+
+function nextQuestion(){
+  qIndex++;
+  if(qIndex>=QUESTIONS.length){ showFinal(); return; }
+  renderQuestion();
+}
+
+function showFinal(){
+  const body = document.getElementById('gameBody');
+  document.getElementById('gameProg').textContent = 'จบเกม';
+  let tier;
+  if(score===QUESTIONS.length) tier='ยอดเยี่ยม! เข้าใจเรื่องเซตแบบเป๊ะทุกข้อ 🏆';
+  else if(score>=QUESTIONS.length*0.7) tier='เก่งมาก! เข้าใจเรื่องเซตดีทีเดียว 🎉';
+  else if(score>=QUESTIONS.length*0.4) tier='ผ่านได้ ลองทบทวนอีกนิดจะแน่นขึ้น 💪';
+  else tier='ลองย้อนไปอ่านเนื้อหาอีกรอบแล้วมาทำใหม่นะ 📖';
+  body.innerHTML = '<div class="finalScore"><div class="big">'+score+' / '+QUESTIONS.length+'</div>'+
+    '<div class="tier">'+tier+'</div>'+
+    '<button class="action nextBtn" onclick="restartGame()">เล่นใหม่อีกครั้ง</button></div>';
+}
+
+function restartGame(){ qIndex=0; score=0; renderQuestion(); }
+renderQuestion();
+
+/* ---------- GAME MODE SWITCH ---------- */
+document.getElementById('gameModeTabs').addEventListener('click', e=>{
+  if(e.target.tagName!=='BUTTON') return;
+  document.querySelectorAll('#gameModeTabs button').forEach(b=>b.classList.remove('active'));
+  e.target.classList.add('active');
+  const mode = e.target.dataset.mode;
+  document.getElementById('quizMode').style.display = mode==='quiz' ? 'block':'none';
+  document.getElementById('matchMode').style.display = mode==='match' ? 'block':'none';
+  if(mode==='match' && !matchStarted){ startMatchGame(); matchStarted = true; }
+});
+
+/* ---------- TAB 6b: MATCHING GAME ---------- */
+const MATCH_PAIRS = [
+  {a:'∈', b:'เป็นสมาชิกของ'},
+  {a:'∉', b:'ไม่เป็นสมาชิกของ'},
+  {a:'∅', b:'เซตว่าง'},
+  {a:'⊆', b:'เป็นสับเซตของ'},
+  {a:'∪', b:'ยูเนียน (รวมกัน)'},
+  {a:'∩', b:'อินเตอร์เซกชัน (ร่วมกัน)'},
+  {a:"A′", b:'คอมพลีเมนต์ของ A'},
+  {a:'U', b:'เอกภพสัมพัทธ์'},
+];
+let matchStarted=false, matchCards=[], flipped=[], matched=0, tries=0, matchLock=false;
+
+function shuffle(arr){
+  for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; }
+  return arr;
+}
+
+function startMatchGame(){
+  matched=0; tries=0; flipped=[]; matchLock=false;
+  document.getElementById('matchFinal').innerHTML='';
+  let cards = [];
+  MATCH_PAIRS.forEach((p,i)=>{
+    cards.push({pairId:i, text:p.a});
+    cards.push({pairId:i, text:p.b});
+  });
+  cards = shuffle(cards).map((c,i)=>({...c, id:i}));
+  matchCards = cards;
+  renderMatchGrid();
+  updateMatchStats();
+}
+
+function renderMatchGrid(){
+  const grid = document.getElementById('matchGrid');
+  grid.innerHTML='';
+  matchCards.forEach(c=>{
+    const el = document.createElement('div');
+    el.className='matchCard';
+    el.dataset.id=c.id;
+    el.innerHTML = '<span class="back">?</span>';
+    el.onclick = ()=>flipMatchCard(c.id);
+    grid.appendChild(el);
+  });
+}
+
+function updateMatchStats(){
+  document.getElementById('matchProg').textContent = 'คู่ที่จับได้: '+matched+' / '+MATCH_PAIRS.length;
+  document.getElementById('matchTries').textContent = 'จำนวนครั้งที่เปิด: '+tries;
+}
+
+function flipMatchCard(id){
+  if(matchLock) return;
+  const cardEl = document.querySelector('.matchCard[data-id="'+id+'"]');
+  if(cardEl.classList.contains('flipped') || cardEl.classList.contains('matched')) return;
+  const card = matchCards.find(c=>c.id===id);
+  cardEl.classList.add('flipped');
+  cardEl.innerHTML = card.text;
+  flipped.push({id, cardEl, pairId:card.pairId});
+  if(flipped.length===2){
+    tries++;
+    updateMatchStats();
+    matchLock = true;
+    if(flipped[0].pairId===flipped[1].pairId){
+      flipped.forEach(f=>{ f.cardEl.classList.add('matched'); f.cardEl.classList.remove('flipped'); });
+      matched++;
+      updateMatchStats();
+      flipped=[];
+      matchLock=false;
+      if(matched===MATCH_PAIRS.length){
+        document.getElementById('matchFinal').innerHTML =
+          '<div class="finalScore"><div class="big">🎉</div><div class="tier">จับคู่ครบทุกคู่ ใช้ไป '+tries+' ครั้ง!</div>'+
+          '<button class="action nextBtn" onclick="startMatchGame()">เล่นใหม่</button></div>';
+      }
+    } else {
+      setTimeout(()=>{
+        flipped.forEach(f=>{ f.cardEl.classList.remove('flipped'); f.cardEl.innerHTML='<span class="back">?</span>'; });
+        flipped=[];
+        matchLock=false;
+      }, 800);
+    }
+  }
+}
+
+/* ---------- 3D SCENES (three.js) ---------- */
+function makeScene(container, w, h){
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(45, w/h, 0.1, 100);
+  camera.position.set(0,0,6.2);
+  const renderer = new THREE.WebGLRenderer({antialias:true, alpha:true});
+  renderer.setSize(w,h,false);
+  renderer.domElement.style.width='100%';
+  renderer.domElement.style.height='auto';
+  renderer.domElement.style.touchAction='none';
+  renderer.domElement.style.cursor='grab';
+  container.appendChild(renderer.domElement);
+
+  scene.add(new THREE.AmbientLight(0xffffff, 0.7));
+  const dl = new THREE.DirectionalLight(0xffffff, 0.6);
+  dl.position.set(3,4,5);
+  scene.add(dl);
+
+  const group = new THREE.Group();
+  scene.add(group);
+
+  let dragging=false, lastX=0, lastY=0, auto=true;
+  const dom = renderer.domElement;
+  const start = e=>{ dragging=true; auto=false; dom.style.cursor='grabbing';
+    const p = e.touches ? e.touches[0] : e; lastX=p.clientX; lastY=p.clientY; };
+  const move = e=>{ if(!dragging) return;
+    const p = e.touches ? e.touches[0] : e;
+    const dx=p.clientX-lastX, dy=p.clientY-lastY; lastX=p.clientX; lastY=p.clientY;
+    group.rotation.y += dx*0.008; group.rotation.x += dy*0.008;
+    group.rotation.x = Math.max(-1.2, Math.min(1.2, group.rotation.x));
+  };
+  const end = ()=>{ dragging=false; dom.style.cursor='grab'; };
+  dom.addEventListener('mousedown', start);
+  window.addEventListener('mousemove', move);
+  window.addEventListener('mouseup', end);
+  dom.addEventListener('touchstart', start, {passive:true});
+  dom.addEventListener('touchmove', move, {passive:true});
+  dom.addEventListener('touchend', end);
+
+  function loop(){
+    requestAnimationFrame(loop);
+    if(auto && !dragging) group.rotation.y += 0.0025;
+    renderer.render(scene, camera);
+  }
+  loop();
+  return {scene, camera, renderer, group};
+}
+
+function makeTextSprite(text, color){
+  const cnv = document.createElement('canvas');
+  cnv.width=256; cnv.height=96;
+  const ctx = cnv.getContext('2d');
+  ctx.font='700 46px Kanit, Sarabun, sans-serif';
+  ctx.fillStyle = color || '#F2EFE3';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText(text, 128, 52);
+  const tex = new THREE.CanvasTexture(cnv);
+  const mat = new THREE.SpriteMaterial({map:tex, transparent:true, depthTest:false});
+  const spr = new THREE.Sprite(mat);
+  spr.scale.set(1.1,0.42,1);
+  return spr;
+}
+
+/* --- Venn 3D --- */
+let venn3dReady=false, vennSphereA, vennSphereB, vennTokenSprites=[];
+function initVenn3D(){
+  if(venn3dReady) return;
+  venn3dReady=true;
+  const {scene, group} = makeScene(document.getElementById('venn3d'), 480, 360);
+  const geo = new THREE.SphereGeometry(1.35, 32, 32);
+  vennSphereA = new THREE.Mesh(geo, new THREE.MeshPhongMaterial({color:0xE7B23B, transparent:true, opacity:0.35, shininess:40}));
+  vennSphereA.position.x = -0.75;
+  vennSphereB = new THREE.Mesh(geo, new THREE.MeshPhongMaterial({color:0x5FA8D3, transparent:true, opacity:0.35, shininess:40}));
+  vennSphereB.position.x = 0.75;
+  group.add(vennSphereA, vennSphereB);
+  vennGroup3D = group;
+}
+let vennGroup3D=null;
+
+function updateVenn3D({onlyA, onlyB, both, none, activeOp, resultSet}){
+  initVenn3D();
+  vennTokenSprites.forEach(s=>vennGroup3D.remove(s));
+  vennTokenSprites = [];
+  const place = (list, cx, cy, spreadX)=>{
+    list.slice(0,10).forEach((t,i)=>{
+      const col = i%3, row=Math.floor(i/3);
+      const x = cx + (col-1)*spreadX;
+      const y = cy - row*0.42;
+      const inResult = !activeOp || (resultSet && resultSet.includes(t));
+      const spr = makeTextSprite(t, inResult ? '#F2EFE3' : '#6b7a70');
+      spr.position.set(x, y, 1.0);
+      spr.material.opacity = inResult ? 1 : 0.28;
+      spr.scale.multiplyScalar(inResult ? 1 : 0.8);
+      vennGroup3D.add(spr);
+      vennTokenSprites.push(spr);
+    });
+  };
+  place(onlyA, -1.55, 0.6, 0.62);
+  place(onlyB, 1.55, 0.6, 0.62);
+  place(both, 0, 0.9, 0.55);
+  place(none, 0, -2.1, 0.62);
+
+  const dim = 0.08, normal = 0.35, bright = 0.55;
+  vennSphereA.material.opacity = normal; vennSphereB.material.opacity = normal;
+  if(activeOp==='notA'){ vennSphereA.material.opacity = dim; }
+  else if(activeOp==='notB'){ vennSphereB.material.opacity = dim; }
+  else if(activeOp==='notUnion'){ vennSphereA.material.opacity = dim; vennSphereB.material.opacity = dim; }
+  else if(activeOp==='aMinusB'){ vennSphereB.material.opacity = dim; }
+  else if(activeOp==='bMinusA'){ vennSphereA.material.opacity = dim; }
+  else if(activeOp==='inter' || activeOp==='union'){ vennSphereA.material.opacity = bright; vennSphereB.material.opacity = bright; }
+}
+
+function setVennView(mode){
+  document.getElementById('venn2dWrap').style.display = mode==='2d' ? 'block':'none';
+  document.getElementById('venn3dWrap').style.display = mode==='3d' ? 'block':'none';
+  document.getElementById('btn2d').style.background = mode==='2d' ? 'var(--accent)' : 'var(--panel-2)';
+  document.getElementById('btn2d').style.color = mode==='2d' ? '#241729' : 'var(--ink)';
+  document.getElementById('btn3d').style.background = mode==='3d' ? 'var(--accent)' : 'var(--panel-2)';
+  document.getElementById('btn3d').style.color = mode==='3d' ? '#241729' : 'var(--ink)';
+  if(mode==='3d') render();
+}
+
+/* --- Power-set cube 3D --- */
+let cube3dReady=false, cubeGroup3D=null;
+function initCube3D(){
+  if(cube3dReady) return;
+  cube3dReady=true;
+  const {group} = makeScene(document.getElementById('cube3d'), 480, 380);
+  cubeGroup3D = group;
+}
+function updateCube3D(setArr){
+  initCube3D();
+  while(cubeGroup3D.children.length) cubeGroup3D.remove(cubeGroup3D.children[0]);
+  const n = setArr.length; // expected 3
+  const pts = {};
+  for(let mask=0; mask<8; mask++){
+    const x=(mask&1)?1:-1, y=(mask&2)?1:-1, z=(mask&4)?1:-1;
+    pts[mask] = new THREE.Vector3(x*1.1, y*1.1, z*1.1);
+    const subset = [];
+    for(let i=0;i<3;i++){ if(mask & (1<<i)) subset.push(setArr[i]); }
+    const label = subset.length ? '{'+subset.join(',')+'}' : '∅';
+    const color = (subset.length===0 || subset.length===3) ? '#C97BC4' : '#F2EFE3';
+    const spr = makeTextSprite(label, color);
+    spr.position.copy(pts[mask]).multiplyScalar(1.28);
+    spr.scale.set(1.3,0.5,1);
+    cubeGroup3D.add(spr);
+    const dotMat = new THREE.MeshPhongMaterial({color:0xC97BC4});
+    const dot = new THREE.Mesh(new THREE.SphereGeometry(0.07,16,16), dotMat);
+    dot.position.copy(pts[mask]);
+    cubeGroup3D.add(dot);
+  }
+  const lineMat = new THREE.LineBasicMaterial({color:0x8FA98A, transparent:true, opacity:0.6});
+  for(let a=0;a<8;a++){
+    for(let bit=0; bit<3; bit++){
+      const b = a ^ (1<<bit);
+      if(b>a){
+        const g = new THREE.BufferGeometry().setFromPoints([pts[a], pts[b]]);
+        cubeGroup3D.add(new THREE.Line(g, lineMat));
+      }
+    }
+  }
+}
+</script>
+</body>
+</html>
